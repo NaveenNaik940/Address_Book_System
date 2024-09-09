@@ -4,7 +4,7 @@
 @Date: 2024-09-08
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-09
-@Title: Ability to add, display, and edit contacts in an Address Book using OOP
+@Title: Ability to add, display, edit and delete contacts in an Address Book using OOP
 
 """
 
@@ -151,6 +151,27 @@ class AddressBook:
         return None
 
 
+    def delete_contact(self, first_name, last_name):
+
+        """
+        Description:
+            Deletes a contact by first and last name.
+
+        Parameter:
+            first_name (str): The first name of the contact.
+            last_name (str): The last name of the contact.
+
+        Return:
+            None
+        """
+        contact = self.find_contact(first_name, last_name)
+        if contact:
+            self.contacts.remove(contact)
+            logger.info(f"Contact {first_name} {last_name} deleted successfully.")
+        else:
+            logger.info(f"Contact {first_name} {last_name} not found.")    
+
+
     def edit_contact(self, first_name, last_name):
 
         """
@@ -195,7 +216,7 @@ def main():
     try:
         address_book = AddressBook()
         while True:
-            print("\n1. Add Contact\n2. Edit Contact\n3. Display Contacts\n4. Exit")
+            print("\n1. Add Contact\n2. Edit Contact\n3. Delete Contact\n4. Display Contacts\n5. Exit")
             choice = input("Choose an option: ")
 
             if choice == '1':
@@ -205,9 +226,13 @@ def main():
                 last_name = input("Enter the last name of the contact to edit: ")
                 address_book.edit_contact(first_name, last_name)
             elif choice == '3':
+                first_name = input("Enter the first name of the contact to delete: ")
+                last_name = input("Enter the last name of the contact to delete: ")
+                address_book.delete_contact(first_name, last_name)
+            elif choice == '4':
                 for contact in address_book.contacts:
                     contact.display()
-            elif choice == '4':
+            elif choice == '5':
                 break
             else:
                 print("Invalid choice. Please try again.")
