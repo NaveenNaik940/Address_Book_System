@@ -1,5 +1,6 @@
 """
- veen Madev Naik
+
+Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
@@ -48,6 +49,7 @@ class Contact:
                     f"Zip Code: {self.zip_code}\n"
                     f"Phone Number: {self.phone_number}\n"
                     f"Email: {self.email}\n")
+
 
     def update_contact(self, **kwargs):
 
@@ -103,6 +105,7 @@ class AddressBook:
                 else:
                     logger.info("Input cannot be empty. Please try again.")
 
+
     def add_contact(self, multiple=False):
 
         """
@@ -147,6 +150,7 @@ class AddressBook:
             if more != 'yes':
                 break
 
+
     def find_contact(self, first_name, last_name):
 
         """
@@ -166,6 +170,7 @@ class AddressBook:
             if contact.first_name.lower() == first_name.lower() and contact.last_name.lower() == last_name.lower():
                 return contact
         return None
+
 
     def delete_contact(self, first_name, last_name):
 
@@ -187,6 +192,7 @@ class AddressBook:
             logger.info(f"Contact {first_name} {last_name} deleted successfully.")
         else:
             logger.info(f"Contact {first_name} {last_name} not found.")
+
 
     def edit_contact(self, first_name, last_name):
 
@@ -245,6 +251,7 @@ class AddressBook:
             print(f"No contacts found in {self.name} Address Book.")
         for contact in self.contacts:
             contact.display()
+
 
     def search_by_city_or_state(self, location):
 
@@ -336,6 +343,26 @@ class AddressBookSystem:
             address_book.search_by_city_or_state(location)
 
 
+    def get_contact_count_by_city_or_state(self, location):
+
+        """
+        Description:
+            Counts the number of contacts by city or state across all address books.
+
+        Parameter:
+            location (str): The city or state to search for.
+
+        Return:
+            (int): The count of contacts found for the given city or state.
+        """
+
+        count = 0
+        for name, address_book in self.address_books.items():
+            found_contacts = [contact for contact in address_book.contacts if contact.city.lower() == location.lower() or contact.state.lower() == location.lower()]
+            count += len(found_contacts)
+        return count
+
+
 def main():
     try:
         system = AddressBookSystem()
@@ -344,7 +371,8 @@ def main():
             print("\n===== Address Book Menu =====")
             print("1. Create Address Book")
             print("2. Select Address Book")
-            print("3. Exit")
+            print("3. Search and Count Contacts by City/State")
+            print("4. Exit")
 
             choice = input("Choose an option: ").strip()
 
@@ -383,7 +411,7 @@ def main():
                         elif book_choice == '5':
                             selected_book.display_contacts()
                         elif book_choice == '6':
-                            location = input("Enter the city to search: ").strip()
+                            location = input("Enter the city or state to search: ").strip()
                             system.search_across_books(location)
                         elif book_choice == '7':
                             break
@@ -393,6 +421,11 @@ def main():
                     print("No address book selected or available.")
 
             elif choice == '3':
+                location = input("Enter the city or state to search for contact count: ").strip()
+                count = system.get_contact_count_by_city_or_state(location)
+                print(f"Total number of contacts in {location}: {count}")
+
+            elif choice == '4':
                 print("Exiting the Address Book system.")
                 break
             else:
@@ -400,6 +433,7 @@ def main():
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()
