@@ -4,14 +4,16 @@
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to add multiple persons, display, edit, and delete contacts in multiple Address Books using OOP
+@Title: Ability to add multiple persons, display, edit, and delete contacts in multiple Address Books using OOP and ensure there is no Duplicate
+        Entry of the same Person in a particular Address Book
 
 """
+
 
 import re
 import mylogging
 
-logger = mylogging.logger_init("address_book_system.py")
+logger = mylogging.logger_init("address_book.py")
 
 
 class Contact:
@@ -106,10 +108,10 @@ class AddressBook:
 
         """
         Description:
-            Adds one or more contacts to the address book.
+            Adds one or more contacts to the address book. Ensures no duplicate entry of the same person.
 
         Parameter:
-            self:Instance of the class
+            self: Instance of the class
             multiple (bool): If True, the method will allow adding multiple contacts.
 
         Return:
@@ -119,6 +121,15 @@ class AddressBook:
         while True:
             first_name = self.get_valid_input("First Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
             last_name = self.get_valid_input("Last Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
+
+            # Check for duplicate contact
+            if self.find_contact(first_name, last_name):
+                logger.info(f"Contact {first_name} {last_name} already exists. Please enter a different contact.")
+                print(f"Contact {first_name} {last_name} already exists.")
+                if not multiple:
+                    return  # Exit if adding a single contact
+                continue  # Ask for a different contact if adding multiple
+
             address = self.get_valid_input("Address: ")
             city = self.get_valid_input("City: ")
             state = self.get_valid_input("State: ")
@@ -129,6 +140,7 @@ class AddressBook:
             contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
             self.contacts.append(contact)
             logger.info(f"Contact {first_name} {last_name} added successfully.")
+            print(f"Contact {first_name} {last_name} added successfully.")
 
             if not multiple:
                 break
@@ -154,7 +166,6 @@ class AddressBook:
         for contact in self.contacts:
             if contact.first_name.lower() == first_name.lower() and contact.last_name.lower() == last_name.lower():
                 return contact
-        logger.info(f"Contact {first_name} {last_name} not found.")
         return None
 
     def delete_contact(self, first_name, last_name):
@@ -282,7 +293,7 @@ class AddressBookSystem:
         for name in self.address_books:
             print(f"- {name}")
         
-        name = input("Enter the name of the address book to select: ")
+        name = input("Enter the name of the address book to select: ").strip()
         return self.address_books.get(name)
 
 
@@ -294,7 +305,7 @@ def main():
             choice = input("Choose an option: ")
 
             if choice == '1':
-                name = input("Enter a unique name for the new address book: ")
+                name = input("Enter a unique name for the new address book: ").strip()
                 system.create_address_book(name)
 
             elif choice == '2':
@@ -323,6 +334,9 @@ def main():
                             break
                         else:
                             print("Invalid choice. Please try again.")
+                else:
+                    print("This address book is not available")
+
             elif choice == '3':
                 break
             else:
