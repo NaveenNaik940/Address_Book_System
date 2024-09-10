@@ -1,10 +1,10 @@
 """
 
 @Author: Naveen Madev Naik
-@Date: 2024-09-08
+@Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
-@Last Modified time: 2024-09-09
-@Title: Ability to add, display, edit and delete contacts in an Address Book using OOP
+@Last Modified time: 2024-09-10
+@Title: Ability to add multiple person, display, edit and delete contacts in an Address Book using OOP
 
 """
 
@@ -101,32 +101,40 @@ class AddressBook:
                     logger.info("Input cannot be empty. Please try again.")
 
 
-    def add_contact(self):
+    def add_contact(self, multiple=False):
 
         """
         Description:
-            Adds a new contact to the address book.
+            Adds one or more contacts to the address book.
 
         Parameter:
             self:Instance of the class
+            multiple (bool): If True, the method will allow adding multiple contacts.
 
         Return:
             None
         """
 
-        first_name = self.get_valid_input("First Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
-        last_name = self.get_valid_input("Last Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
-        address = self.get_valid_input("Address: ")
-        city = self.get_valid_input("City: ")
-        state = self.get_valid_input("State: ")
-        zip_code = self.get_valid_input("ZIP Code: ", r'^\d{6}$', "Invalid ZIP Code. Please enter a 6-digit number.")
-        phone_number = self.get_valid_input("Phone Number: ", r'^\d{10}$', "Invalid Phone Number. Please enter a 10-digit number.")
-        email = self.get_valid_input("Email: ", r'^\w+@\w+\.\w+$', "Invalid Email. Please enter a valid email address.")
+        while True:
+            first_name = self.get_valid_input("First Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
+            last_name = self.get_valid_input("Last Name: ", r'[A-Za-z]{3,}$', "Invalid Name. Enter at least a 3-letter name")
+            address = self.get_valid_input("Address: ")
+            city = self.get_valid_input("City: ")
+            state = self.get_valid_input("State: ")
+            zip_code = self.get_valid_input("ZIP Code: ", r'^\d{6}$', "Invalid ZIP Code. Please enter a 6-digit number.")
+            phone_number = self.get_valid_input("Phone Number: ", r'^\d{10}$', "Invalid Phone Number. Please enter a 10-digit number.")
+            email = self.get_valid_input("Email: ", r'^\w+@\w+\.\w+$', "Invalid Email. Please enter a valid email address.")
 
-        contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
-        self.contacts.append(contact)
-        logger.info(f"Contact {first_name} {last_name} added successfully.")
-        return contact
+            contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
+            self.contacts.append(contact)
+            logger.info(f"Contact {first_name} {last_name} added successfully.")
+
+            # If the user doesn't want to add more contacts, exit the loop
+            if not multiple:
+                break
+            more = input("Do you want to add another contact? (yes/no): ").strip().lower()
+            if more != 'yes':
+                break
 
 
     def find_contact(self, first_name, last_name):
@@ -216,23 +224,25 @@ def main():
     try:
         address_book = AddressBook()
         while True:
-            print("\n1. Add Contact\n2. Edit Contact\n3. Delete Contact\n4. Display Contacts\n5. Exit")
+            print("\n1. Add Single Contact\n2. Add Multiple Contacts\n3. Edit Contact\n4. Delete Contact\n5. Display Contacts\n6. Exit")
             choice = input("Choose an option: ")
 
             if choice == '1':
                 address_book.add_contact()
             elif choice == '2':
+                address_book.add_contact(multiple=True)
+            elif choice == '3':
                 first_name = input("Enter the first name of the contact to edit: ")
                 last_name = input("Enter the last name of the contact to edit: ")
                 address_book.edit_contact(first_name, last_name)
-            elif choice == '3':
+            elif choice == '4':
                 first_name = input("Enter the first name of the contact to delete: ")
                 last_name = input("Enter the last name of the contact to delete: ")
                 address_book.delete_contact(first_name, last_name)
-            elif choice == '4':
+            elif choice == '5':
                 for contact in address_book.contacts:
                     contact.display()
-            elif choice == '5':
+            elif choice == '6':
                 break
             else:
                 print("Invalid choice. Please try again.")
