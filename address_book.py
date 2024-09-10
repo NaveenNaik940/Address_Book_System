@@ -1,14 +1,12 @@
 """
-
-@Author: Naveen Madev Naik
+ veen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to add multiple persons, display, edit, and delete contacts in multiple Address Books using OOP and ensure there is no Duplicate
-        Entry of the same Person in a particular Address Book
+@Title: Ability to add multiple persons, display, edit, delete, and search contacts in multiple Address Books using OOP, ensuring no duplicate
+        entries of the same person in a particular Address Book and search Person in a City or State across the multiple Address Book 
 
 """
-
 
 import re
 import mylogging
@@ -58,7 +56,7 @@ class Contact:
 
         Parameter:
             self:Instance of the class
-            **kwargs:keyword arguements takes multiple arguement
+            **kwargs:keyword arguments to take multiple values
 
         Return:
             None
@@ -228,6 +226,7 @@ class AddressBook:
         else:
             logger.info(f"Contact {first_name} {last_name} does not exist.")
 
+
     def display_contacts(self):
 
         """
@@ -245,6 +244,26 @@ class AddressBook:
             print(f"No contacts found in {self.name} Address Book.")
         for contact in self.contacts:
             contact.display()
+
+    def search_by_city_or_state(self, location):
+
+        """
+        Description:
+            Searches contacts by city or state in the address book.
+
+        Parameter:
+            location (str): The city or state to search by.
+
+        Return:
+            None
+        """
+
+        found_contacts = [contact for contact in self.contacts if contact.city.lower() == location.lower() or contact.state.lower() == location.lower()]
+        if found_contacts:
+            for contact in found_contacts:
+                contact.display()
+        else:
+            print(f"No contacts found in {self.name} for the location {location}.")
 
 
 class AddressBookSystem:
@@ -268,9 +287,11 @@ class AddressBookSystem:
 
         if name in self.address_books:
             logger.info(f"Address book with name {name} already exists.")
+            print(f"Address book with name {name} already exists.")
         else:
             self.address_books[name] = AddressBook(name)
             logger.info(f"Address book {name} created successfully.")
+            print(f"Address book {name} created successfully.")
 
     def select_address_book(self):
 
@@ -296,54 +317,88 @@ class AddressBookSystem:
         name = input("Enter the name of the address book to select: ").strip()
         return self.address_books.get(name)
 
+    def search_across_books(self, location):
+
+        """
+        Description:
+            Searches across all address books for contacts by city or state.
+
+        Parameter:
+            location (str): The city or state to search by.
+
+        Return:
+            None
+        """
+
+        for name, address_book in self.address_books.items():
+            print(f"Searching in {name} Address Book:")
+            address_book.search_by_city_or_state(location)
+
 
 def main():
     try:
         system = AddressBookSystem()
+
         while True:
-            print("\n1. Create Address Book\n2. Select Address Book\n3. Exit")
-            choice = input("Choose an option: ")
+            print("\n===== Address Book Menu =====")
+            print("1. Create Address Book")
+            print("2. Select Address Book")
+            print("3. Exit")
+
+            choice = input("Choose an option: ").strip()
 
             if choice == '1':
-                name = input("Enter a unique name for the new address book: ").strip()
+                name = input("Enter a unique name for the new Address Book: ").strip()
                 system.create_address_book(name)
 
             elif choice == '2':
                 selected_book = system.select_address_book()
+                
                 if selected_book:
                     while True:
-                        print(f"\nAddress Book: {selected_book.name}")
-                        print("1. Add Single Contact\n2. Add Multiple Contacts\n3. Edit Contact\n4. Delete Contact\n5. Display Contacts\n6. Go Back")
-                        book_choice = input("Choose an option: ")
+                        print(f"\n===== {selected_book.name} Menu =====")
+                        print("1. Add Single Contact")
+                        print("2. Add Multiple Contacts")
+                        print("3. Edit Contact")
+                        print("4. Delete Contact")
+                        print("5. Display Contacts")
+                        print("6. Search Contact by City/State")
+                        print("7. Go Back")
+
+                        book_choice = input("Choose an option: ").strip()
 
                         if book_choice == '1':
                             selected_book.add_contact()
                         elif book_choice == '2':
                             selected_book.add_contact(multiple=True)
                         elif book_choice == '3':
-                            first_name = input("Enter the first name of the contact to edit: ")
-                            last_name = input("Enter the last name of the contact to edit: ")
+                            first_name = input("Enter the first name of the contact to edit: ").strip()
+                            last_name = input("Enter the last name of the contact to edit: ").strip()
                             selected_book.edit_contact(first_name, last_name)
                         elif book_choice == '4':
-                            first_name = input("Enter the first name of the contact to delete: ")
-                            last_name = input("Enter the last name of the contact to delete: ")
+                            first_name = input("Enter the first name of the contact to delete: ").strip()
+                            last_name = input("Enter the last name of the contact to delete: ").strip()
                             selected_book.delete_contact(first_name, last_name)
                         elif book_choice == '5':
                             selected_book.display_contacts()
                         elif book_choice == '6':
+                            location = input("Enter the city to search: ").strip()
+                            system.search_across_books(location)
+                        elif book_choice == '7':
                             break
                         else:
                             print("Invalid choice. Please try again.")
                 else:
-                    print("This address book is not available")
+                    print("No address book selected or available.")
 
             elif choice == '3':
+                print("Exiting the Address Book system.")
                 break
             else:
                 print("Invalid choice. Please try again.")
+
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-
 
 if __name__ == "__main__":
     main()
