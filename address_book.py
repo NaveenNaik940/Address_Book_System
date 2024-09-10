@@ -4,14 +4,14 @@
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to add multiple person, display, edit and delete contacts in an Address Book using OOP
+@Title: Ability to add multiple persons, display, edit, and delete contacts in multiple Address Books using OOP
 
 """
 
 import re
 import mylogging
 
-logger = mylogging.logger_init("address_book.py")
+logger = mylogging.logger_init("address_book_system.py")
 
 
 class Contact:
@@ -56,7 +56,8 @@ class Contact:
 
         Parameter:
             self:Instance of the class
-        
+            **kwargs:keyword arguements takes multiple arguement
+
         Return:
             None
         """
@@ -68,7 +69,8 @@ class Contact:
 
 class AddressBook:
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.contacts = []
 
     @staticmethod
@@ -86,7 +88,7 @@ class AddressBook:
         Return:
             (str): The valid input from the user.        
         """
-
+        
         while True:
             value = input(prompt)
             if regex_pattern:
@@ -99,7 +101,6 @@ class AddressBook:
                     return value
                 else:
                     logger.info("Input cannot be empty. Please try again.")
-
 
     def add_contact(self, multiple=False):
 
@@ -129,13 +130,11 @@ class AddressBook:
             self.contacts.append(contact)
             logger.info(f"Contact {first_name} {last_name} added successfully.")
 
-            # If the user doesn't want to add more contacts, exit the loop
             if not multiple:
                 break
             more = input("Do you want to add another contact? (yes/no): ").strip().lower()
             if more != 'yes':
                 break
-
 
     def find_contact(self, first_name, last_name):
 
@@ -158,7 +157,6 @@ class AddressBook:
         logger.info(f"Contact {first_name} {last_name} not found.")
         return None
 
-
     def delete_contact(self, first_name, last_name):
 
         """
@@ -172,13 +170,13 @@ class AddressBook:
         Return:
             None
         """
+
         contact = self.find_contact(first_name, last_name)
         if contact:
             self.contacts.remove(contact)
             logger.info(f"Contact {first_name} {last_name} deleted successfully.")
         else:
-            logger.info(f"Contact {first_name} {last_name} not found.")    
-
+            logger.info(f"Contact {first_name} {last_name} not found.")
 
     def edit_contact(self, first_name, last_name):
 
@@ -193,7 +191,7 @@ class AddressBook:
         Return:
             None          
         """
-        
+
         contact = self.find_contact(first_name, last_name)
         if contact:
             print("Editing contact details. Leave blank to keep current value.")
@@ -219,30 +217,113 @@ class AddressBook:
         else:
             logger.info(f"Contact {first_name} {last_name} does not exist.")
 
+    def display_contacts(self):
+
+        """
+        Description:
+            Displays all the contacts in the address book.
+
+        Parameter:
+            self:Instance of class
+
+        Return:
+            None                
+        """
+
+        if not self.contacts:
+            print(f"No contacts found in {self.name} Address Book.")
+        for contact in self.contacts:
+            contact.display()
+
+
+class AddressBookSystem:
+
+    def __init__(self):
+        self.address_books = {}
+
+    def create_address_book(self, name):
+
+        """
+        Description:
+            Creates a new address book with a unique name.
+
+        Parameter:
+            self:Instance of the class
+            name:name of the address book needs to be created
+
+        Return:
+            None              
+        """
+
+        if name in self.address_books:
+            logger.info(f"Address book with name {name} already exists.")
+        else:
+            self.address_books[name] = AddressBook(name)
+            logger.info(f"Address book {name} created successfully.")
+
+    def select_address_book(self):
+
+        """
+        Description:
+            Selects an existing address book by name.
+
+        Parameter:
+            self:Instance of the class
+
+        Return:
+            None               
+        """
+
+        if not self.address_books:
+            print("No address books available.")
+            return None
+
+        print("\nAvailable Address Books:")
+        for name in self.address_books:
+            print(f"- {name}")
+        
+        name = input("Enter the name of the address book to select: ")
+        return self.address_books.get(name)
+
 
 def main():
     try:
-        address_book = AddressBook()
+        system = AddressBookSystem()
         while True:
-            print("\n1. Add Single Contact\n2. Add Multiple Contacts\n3. Edit Contact\n4. Delete Contact\n5. Display Contacts\n6. Exit")
+            print("\n1. Create Address Book\n2. Select Address Book\n3. Exit")
             choice = input("Choose an option: ")
 
             if choice == '1':
-                address_book.add_contact()
+                name = input("Enter a unique name for the new address book: ")
+                system.create_address_book(name)
+
             elif choice == '2':
-                address_book.add_contact(multiple=True)
+                selected_book = system.select_address_book()
+                if selected_book:
+                    while True:
+                        print(f"\nAddress Book: {selected_book.name}")
+                        print("1. Add Single Contact\n2. Add Multiple Contacts\n3. Edit Contact\n4. Delete Contact\n5. Display Contacts\n6. Go Back")
+                        book_choice = input("Choose an option: ")
+
+                        if book_choice == '1':
+                            selected_book.add_contact()
+                        elif book_choice == '2':
+                            selected_book.add_contact(multiple=True)
+                        elif book_choice == '3':
+                            first_name = input("Enter the first name of the contact to edit: ")
+                            last_name = input("Enter the last name of the contact to edit: ")
+                            selected_book.edit_contact(first_name, last_name)
+                        elif book_choice == '4':
+                            first_name = input("Enter the first name of the contact to delete: ")
+                            last_name = input("Enter the last name of the contact to delete: ")
+                            selected_book.delete_contact(first_name, last_name)
+                        elif book_choice == '5':
+                            selected_book.display_contacts()
+                        elif book_choice == '6':
+                            break
+                        else:
+                            print("Invalid choice. Please try again.")
             elif choice == '3':
-                first_name = input("Enter the first name of the contact to edit: ")
-                last_name = input("Enter the last name of the contact to edit: ")
-                address_book.edit_contact(first_name, last_name)
-            elif choice == '4':
-                first_name = input("Enter the first name of the contact to delete: ")
-                last_name = input("Enter the last name of the contact to delete: ")
-                address_book.delete_contact(first_name, last_name)
-            elif choice == '5':
-                for contact in address_book.contacts:
-                    contact.display()
-            elif choice == '6':
                 break
             else:
                 print("Invalid choice. Please try again.")
