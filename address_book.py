@@ -4,12 +4,13 @@ Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city and finally stores address book in file
+@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city and finally stores address book in file(txt,csv)
 
 """
 
 import re
 import os
+import csv
 import mylogging
 
 logger = mylogging.logger_init("address_book.py")
@@ -77,28 +78,41 @@ class AddressBook:
         self.contacts = []
         self.load_from_file()
 
-    def save_to_file(self):
-
+    def save_to_file(self, file_type="txt"):
+        
         """
         Description:
-            Saves the current address book contacts to a text file.
+            Saves the current address book contacts to either a text file or a CSV file
+            depending on the user's choice.
 
-        Parameter:
-            self:Instance of the class
+        Parameters:
+            file_type (str): Type of file to save ('txt' for text, 'csv' for CSV)
 
         Return:
             None
         """
 
-        filename = f"{self.name}.txt"
-        with open(filename, 'w') as f:
-            for contact in self.contacts:
-                contact_info = f"{contact.first_name},{contact.last_name},{contact.address},{contact.city},{contact.state},{contact.zip_code},{contact.phone_number},{contact.email}\n"
-                f.write(contact_info)
-        logger.info(f"Address book {self.name} saved to {filename}.")
+        if file_type == "csv":
+            filename = f"{self.name}.csv"
+            with open(filename, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['First Name', 'Last Name', 'Address', 'City', 'State', 'Zip Code', 'Phone Number', 'Email'])
+                for contact in self.contacts:
+                    writer.writerow([contact.first_name, contact.last_name, contact.address, contact.city,
+                                    contact.state, contact.zip_code, contact.phone_number, contact.email])
+            logger.info(f"Address book {self.name} saved to {filename}.")
+            print(f"Address book saved to {filename}.")
+
+        elif file_type == 'txt':
+            filename = f"{self.name}.txt"
+            with open(filename, 'w') as f:
+                for contact in self.contacts:
+                    contact_info = f"{contact.first_name},{contact.last_name},{contact.address},{contact.city},{contact.state},{contact.zip_code},{contact.phone_number},{contact.email}\n"
+                    f.write(contact_info)
+            logger.info(f"Address book {self.name} saved to {filename}.")
 
 
-    def load_from_file(self):
+    def load_from_file(self,file_type='txt'):
 
         """
         Description:
@@ -106,23 +120,41 @@ class AddressBook:
 
         Parmater:
             self:Instance of the class
+            file_type (str): Type of file to load ('txt' for text, 'csv' for CSV)
 
         Return:
             None
+        
         """
+        
+        if file_type == 'csv':
+            filename = f"{self.name}.csv"
+            if os.path.exists(filename):
+                with open(filename, 'r') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) == 7:
+                            contact = Contact(first_name=row[0], last_name=row[1], address=row[2], 
+                                            city=row[3], state=row[4], zip_code=row[5], 
+                                            phone_number=row[6], email=row[7])
+                            self.contacts.append(contact)
+                logger.info(f"Address book {self.name} loaded from {filename}.")
+                print(f"Address book loaded from {filename}.")
 
-        filename = f"{self.name}.txt"
-        if os.path.exists(filename):
-            with open(filename, 'r') as f:
-                for line in f:
-                    # Each line in the file is in the format:
-                    # "first_name,last_name,address,city,state,zip_code,phone_number,email"
-                    contact_data = line.strip().split(',')
-                    if len(contact_data) == 8:  
-                        first_name, last_name, address, city, state, zip_code, phone_number, email = contact_data
-                        contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
-                        self.contacts.append(contact)
-            logger.info(f"Address book {self.name} loaded from {filename}.")
+        elif file_type == 'txt':
+            filename = f"{self.name}.txt"
+            if os.path.exists(filename):
+                with open(filename, 'r') as f:
+                    for line in f:
+                        # Each line in the file is in the format:
+                        # "first_name,last_name,address,city,state,zip_code,phone_number,email"
+                        contact_data = line.strip().split(',')
+                        if len(contact_data) == 8:  
+                            first_name, last_name, address, city, state, zip_code, phone_number, email = contact_data
+                            contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
+                            self.contacts.append(contact)
+                logger.info(f"Address book {self.name} loaded from {filename}.")
 
 
     @staticmethod
@@ -500,10 +532,14 @@ def main():
                 print(f"Total number of contacts in {location}: {count}")
 
             elif choice == '4':
-                for book in system.address_books.values():
-                    book.save_to_file()
-                print("All address books saved. Exiting.")
-                break                
+                file_type = input("Enter file type to save (txt or csv): ").strip().lower()
+                if file_type not in ['txt', 'csv']:
+                    print("Invalid file type. Please enter 'txt' or 'csv'.")
+                else:
+                    for book in system.address_books.values():
+                        book.save_to_file(file_type)
+                    print("All address books saved. Exiting.")
+                break               
 
             elif choice == '5':
                 print("Exiting the Address Book system.")
