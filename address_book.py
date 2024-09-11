@@ -4,11 +4,12 @@ Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city
+@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city and finally stores address book in file
 
 """
 
 import re
+import os
 import mylogging
 
 logger = mylogging.logger_init("address_book.py")
@@ -70,9 +71,59 @@ class Contact:
 
 class AddressBook:
 
+
     def __init__(self, name):
         self.name = name
         self.contacts = []
+        self.load_from_file()
+
+    def save_to_file(self):
+
+        """
+        Description:
+            Saves the current address book contacts to a text file.
+
+        Parameter:
+            self:Instance of the class
+
+        Return:
+            None
+        """
+
+        filename = f"{self.name}.txt"
+        with open(filename, 'w') as f:
+            for contact in self.contacts:
+                contact_info = f"{contact.first_name},{contact.last_name},{contact.address},{contact.city},{contact.state},{contact.zip_code},{contact.phone_number},{contact.email}\n"
+                f.write(contact_info)
+        logger.info(f"Address book {self.name} saved to {filename}.")
+
+
+    def load_from_file(self):
+
+        """
+        Description:
+            Loads contacts from a text file if it exists.
+
+        Parmater:
+            self:Instance of the class
+
+        Return:
+            None
+        """
+
+        filename = f"{self.name}.txt"
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                for line in f:
+                    # Each line in the file is in the format:
+                    # "first_name,last_name,address,city,state,zip_code,phone_number,email"
+                    contact_data = line.strip().split(',')
+                    if len(contact_data) == 8:  
+                        first_name, last_name, address, city, state, zip_code, phone_number, email = contact_data
+                        contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
+                        self.contacts.append(contact)
+            logger.info(f"Address book {self.name} loaded from {filename}.")
+
 
     @staticmethod
     def get_valid_input(prompt, regex_pattern=None, error_message="Invalid input. Please try again."):
@@ -386,7 +437,8 @@ def main():
             print("1. Create Address Book")
             print("2. Select Address Book")
             print("3. Search and Count Contacts by City/State")
-            print("4. Exit")
+            print("4. Save as File and Exit")
+            print("5. Exit")
 
             choice = input("Choose an option: ").strip()
 
@@ -448,8 +500,15 @@ def main():
                 print(f"Total number of contacts in {location}: {count}")
 
             elif choice == '4':
+                for book in system.address_books.values():
+                    book.save_to_file()
+                print("All address books saved. Exiting.")
+                break                
+
+            elif choice == '5':
                 print("Exiting the Address Book system.")
                 break
+
             else:
                 print("Invalid choice. Please try again.")
 
