@@ -4,13 +4,14 @@ Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city and finally stores address book in file(txt,csv)
+@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city and finally stores address book in file(txt,csv,json)
 
 """
 
 import re
 import os
 import csv
+import json
 import mylogging
 
 logger = mylogging.logger_init("address_book.py")
@@ -82,11 +83,11 @@ class AddressBook:
         
         """
         Description:
-            Saves the current address book contacts to either a text file or a CSV file
+            Saves the current address book contacts to either a text file or a CSV file or json file
             depending on the user's choice.
 
         Parameters:
-            file_type (str): Type of file to save ('txt' for text, 'csv' for CSV)
+            file_type (str): Type of file to save ('txt' for text, 'csv' for CSV, 'json' for json)
 
         Return:
             None
@@ -110,6 +111,15 @@ class AddressBook:
                     contact_info = f"{contact.first_name},{contact.last_name},{contact.address},{contact.city},{contact.state},{contact.zip_code},{contact.phone_number},{contact.email}\n"
                     f.write(contact_info)
             logger.info(f"Address book {self.name} saved to {filename}.")
+        
+        elif file_type == 'json':
+            filename = f"{self.name}.json"
+            with open(filename, 'w') as f:
+                contacts_data = [contact.__dict__ for contact in self.contacts]
+                json.dump(contacts_data, f, indent=4)
+            logger.info(f"Address book {self.name} saved to {filename}.")
+
+    
 
 
     def load_from_file(self,file_type='txt'):
@@ -155,6 +165,16 @@ class AddressBook:
                             contact = Contact(first_name, last_name, address, city, state, zip_code, phone_number, email)
                             self.contacts.append(contact)
                 logger.info(f"Address book {self.name} loaded from {filename}.")
+
+        elif file_type == 'json':
+            filename = f"{self.name}.json"
+            if os.path.exists(filename):
+                with open(filename, 'r') as f:
+                    contacts_data = json.load(f)
+                    for contact_data in contacts_data:
+                        contact = Contact(**contact_data)
+                        self.contacts.append(contact)
+                logger.info(f"Address book {self.name} loaded from {filename}.")        
 
 
     @staticmethod
@@ -532,9 +552,9 @@ def main():
                 print(f"Total number of contacts in {location}: {count}")
 
             elif choice == '4':
-                file_type = input("Enter file type to save (txt or csv): ").strip().lower()
-                if file_type not in ['txt', 'csv']:
-                    print("Invalid file type. Please enter 'txt' or 'csv'.")
+                file_type = input("Enter file type to save (txt or csv or json): ").strip().lower()
+                if file_type not in ['txt', 'csv','json']:
+                    print("Invalid file type. Please enter 'txt' or 'csv' or 'json'.")
                 else:
                     for book in system.address_books.values():
                         book.save_to_file(file_type)
