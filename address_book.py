@@ -4,7 +4,7 @@ Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name
+@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name or city
 
 """
 
@@ -229,18 +229,18 @@ class AddressBook:
                 email=new_email
             )
         else:
-            logger.info(f"Contact {first_name} {last_name} does not exist.")
+            logger.info(f"Contact {first_name} {last_name} not exist.")
 
 
-    def display_contacts(self,sort=False):
+    def display_contacts(self,option=None):
 
         """
         Description:
-            Displays all the contacts in the address book, sorted by first name and last name.
+            Displays all the contacts in the address book, sorted by first name and last name or city
 
         Parameter:
             self: Instance of the class.
-            sort(boolean):sort by name is true or false
+            option(str):sorting the contacts based on the option
 
         Return:
             None                
@@ -251,12 +251,17 @@ class AddressBook:
             return
         
         # Sort contacts by first and last name
-        if sort:
+        if option=='name':
             sorted_contacts = sorted(self.contacts, key=lambda contact: (contact.first_name.lower(), contact.last_name.lower()))
 
         # Display sorted contacts
             for contact in sorted_contacts:
                 contact.display()
+
+        elif option == 'city':
+            sorted_contacts = sorted(self.contacts, key=lambda contact: (contact.city.lower()))
+            for contact in sorted_contacts:
+                contact.display()        
         else:
             for contact in self.contacts:
                 contact.display()        
@@ -418,10 +423,13 @@ def main():
                             last_name = input("Enter the last name of the contact to delete: ").strip()
                             selected_book.delete_contact(first_name, last_name)
                         elif book_choice == '5':
-                            print("!..Sort the contact by name..!")
-                            sort_option=input("enter 1 for sort and enter anything for not sorted").strip().lower()
-                            if sort_option =="1":
-                                selected_book.display_contacts(True)
+                            print("Sort Contacts By\n")
+                            print("1.Sort By Name\n2.sort by City\n3.No sorting")
+                            option=input("Enter Your Option: ")
+                            if option == '1':
+                                selected_book.display_contacts('name')
+                            elif option == '2': 
+                                selected_book.display_contacts('city') 
                             else:
                                 selected_book.display_contacts()    
                         elif book_choice == '6':
