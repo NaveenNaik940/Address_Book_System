@@ -4,9 +4,7 @@ Naveen Madev Naik
 @Date: 2024-09-10
 @Last Modified by: Naveen Madev Naik
 @Last Modified time: 2024-09-10
-@Title: Ability to add multiple persons, display, edit, delete, and search contacts in multiple Address Books using OOP, ensuring no duplicate
-        entries of the same person in a particular Address Book and search Person in a City or State across the multiple Address Book and to view Persons
-        by City or State
+@Title: Ability to create contacts in address book and multiple address book with no duplicate contacts and sort the conctact by name
 
 """
 
@@ -234,14 +232,15 @@ class AddressBook:
             logger.info(f"Contact {first_name} {last_name} does not exist.")
 
 
-    def display_contacts(self):
+    def display_contacts(self,sort=False):
 
         """
         Description:
-            Displays all the contacts in the address book.
+            Displays all the contacts in the address book, sorted by first name and last name.
 
         Parameter:
-            self:Instance of class
+            self: Instance of the class.
+            sort(boolean):sort by name is true or false
 
         Return:
             None                
@@ -249,8 +248,18 @@ class AddressBook:
 
         if not self.contacts:
             print(f"No contacts found in {self.name} Address Book.")
-        for contact in self.contacts:
-            contact.display()
+            return
+        
+        # Sort contacts by first and last name
+        if sort:
+            sorted_contacts = sorted(self.contacts, key=lambda contact: (contact.first_name.lower(), contact.last_name.lower()))
+
+        # Display sorted contacts
+            for contact in sorted_contacts:
+                contact.display()
+        else:
+            for contact in self.contacts:
+                contact.display()        
 
 
     def search_by_city_or_state(self, location):
@@ -409,7 +418,12 @@ def main():
                             last_name = input("Enter the last name of the contact to delete: ").strip()
                             selected_book.delete_contact(first_name, last_name)
                         elif book_choice == '5':
-                            selected_book.display_contacts()
+                            print("!..Sort the contact by name..!")
+                            sort_option=input("enter 1 for sort and enter anything for not sorted").strip().lower()
+                            if sort_option =="1":
+                                selected_book.display_contacts(True)
+                            else:
+                                selected_book.display_contacts()    
                         elif book_choice == '6':
                             location = input("Enter the city or state to search: ").strip()
                             system.search_across_books(location)
