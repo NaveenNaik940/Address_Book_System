@@ -1,0 +1,22 @@
+[
+    {
+        "first_name": "Naveen",
+        "last_name": "Naik",
+        "address": "Puaravaga",
+        "city": "Bhatkal",
+        "state": "Karnataka",
+        "zip_code": "468312",
+        "phone_number": "8906543278",
+        "email": "naiknaveen@gmail.com"
+    },
+    {
+        "first_name": "Suresh",
+        "last_name": "Sai",
+        "address": "Pavagada",
+        "city": "Tumkur",
+        "state": "Karnataka",
+        "zip_code": "789342",
+        "phone_number": "6754321097",
+        "email": "saisuresh@gmail.com"
+    }
+]
